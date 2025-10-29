@@ -1,0 +1,6 @@
+flask fresh      # Fresh database with seed data
+flask destroy    # Delete database
+flask reset      # Recreate tables
+flask seed       # Add seed data
+flask stats      # Show counts
+flask shell      # Interactive Python shell

@@ -1,7 +1,10 @@
-import { useRouteError } from "react-router-dom";
+// src/pages/ErrorPage.jsx
+import { useRouteError, useNavigate } from "react-router-dom";
 
 function ErrorPage() {
     const error = useRouteError();
+    const navigate = useNavigate();
+    
     console.error(error);
 
     return (
@@ -11,8 +14,12 @@ function ErrorPage() {
             <p>
                 <i>{error.statusText || error.message}</i>
             </p>
+            
+            <button onClick={() => navigate('/')}>
+                Return to Home
+            </button>
         </div>
     );
 }
 
-export default ErrorPage
+export default ErrorPage;

@@ -1,28 +1,12 @@
+# app/schemas.py
 from app.extensions import ma
 from app.models import User, Category, Recipe
-
-class UserSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = User
-        load_instance = True
-        exclude = ('_password_hash',)  # Never expose password hash
-        load_only = ('password',)  # Password only for input, not output
-    
-    # Allow password input for creation/update
-    password = ma.String(load_only=True, required=True)
-    
-    # Include related recipes
-    recipes = ma.Nested('RecipeSchema', many=True, exclude=('user',))
-
 
 class CategorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Category
         load_instance = True
         include_fk = True
-    
-    # Include related recipes (optional)
-    recipes = ma.Nested('RecipeSchema', many=True, exclude=('category',))
 
 
 class RecipeSchema(ma.SQLAlchemyAutoSchema):
@@ -31,12 +15,27 @@ class RecipeSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         include_fk = True
     
-    # Nested relationships
-    user = ma.Nested(UserSchema, exclude=('recipes', '_password_hash'))
-    category = ma.Nested(CategorySchema, exclude=('recipes',))
+    category = ma.Nested(CategorySchema)
 
 
-# Schema instances for use in routes
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        load_instance = True
+        exclude = ('_password_hash', 'recipes')  # ← EXCLUDE recipes!
+        load_only = ('password',)
+    
+    password = ma.String(load_only=True, required=True)
+    
+    # ONLY include categories - NO recipes
+    categories = ma.Method("get_categories")
+    
+    def get_categories(self, obj):
+        """Get user's categories"""
+        return [{'id': cat.id, 'name': cat.name} for cat in obj.categories]
+
+
+# Schema instances
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 

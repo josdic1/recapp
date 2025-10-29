@@ -1,3 +1,4 @@
+# app/routes/main.py
 from flask import Blueprint, request, jsonify, session
 from app.extensions import db
 from app.models import User, Category, Recipe
@@ -17,6 +18,14 @@ from app.services import (
 )
 
 main_bp = Blueprint('main', __name__)
+
+# ==================== HEALTH CHECK ====================
+
+@main_bp.route('/', methods=['GET'])
+def health_check():
+    """API health check"""
+    return jsonify({'message': 'Recipe API is running'}), 200
+
 
 # ==================== SESSION MANAGEMENT ROUTES ====================
 
@@ -208,26 +217,22 @@ def delete_category_route(category_id):
 
 @main_bp.route('/recipes', methods=['GET'])
 def get_recipes():
-    """
-    Get recipes filtered by user_id and/or category_id
-    Query params: ?user_id=1&category_id=2
-    """
-    user_id = request.args.get('user_id', type=int)
+    """Get recipes for logged-in user, optionally filtered by category"""
+    # Get user from session
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+    
     category_id = request.args.get('category_id', type=int)
     
-    if user_id and category_id:
-        # Get recipes by specific user AND category
-        recipes = Recipe.query.filter_by(user_id=user_id, category_id=category_id).all()
-    elif user_id:
-        # Get all recipes by user
-        recipes = get_recipes_by_user(user_id)
-    elif category_id:
-        # Get all recipes in category (across all users - probably not needed)
-        recipes = get_recipes_by_category(category_id)
-    else:
-        # Get all recipes
-        recipes = get_all_recipes()
+    # Always filter by session user
+    query = Recipe.query.filter_by(user_id=user_id)
     
+    if category_id:
+        query = query.filter_by(category_id=category_id)
+    
+    recipes = query.all()
     return jsonify(recipes_schema.dump(recipes)), 200
 
 
@@ -289,11 +294,3 @@ def delete_recipe_route(recipe_id):
         return jsonify({'error': error}), 404
     
     return jsonify({'message': 'Recipe deleted successfully'}), 200
-
-
-# ==================== HEALTH CHECK ====================
-
-@main_bp.route('/', methods=['GET'])
-def health_check():
-    """API health check"""
-    return jsonify({'message': 'Recipe API is running'}), 200

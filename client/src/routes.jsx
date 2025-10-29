@@ -1,6 +1,10 @@
 import App from "./App";
-import ErrorPage from "./pages/HomePage";
+import ErrorPage from "./pages/ErrorPage";
 import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import TestPage from "./pages/TestPage";
+import DashboardPage from "./pages/DashboardPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const routes = [
     {
@@ -11,8 +15,25 @@ const routes = [
             {
                 index: true,
                 element: <HomePage />
-        }]
+            },
+            {
+                path: "login",
+                element: <LoginPage />
+            },
+            {
+                path: "test",
+                element: <TestPage />
+            },
+            {
+                path: "dashboard",
+                element: (
+                    <ProtectedRoute>
+                        <DashboardPage />
+                    </ProtectedRoute>
+                )
+            }
+        ]
     },
 ];
 
-export default routes
+export default routes;

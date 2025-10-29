@@ -1,26 +1,53 @@
+// src/api/api.js
 import axios from 'axios';
 
-// Base URL for API calls (proxied through Vite)
 const API_BASE = '/api';
 
-// Create axios instance with credentials
 const api = axios.create({
   baseURL: API_BASE,
-  withCredentials: true, // Important for session cookies
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
+// Add request interceptor to log outgoing requests
+api.interceptors.request.use(
+  (config) => {
+    console.log(`🌐 [API REQUEST] ${config.method.toUpperCase()} ${config.url}`, config.data || '');
+    return config;
+  },
+  (error) => {
+    console.error('❌ [API REQUEST ERROR]', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to log responses
+api.interceptors.response.use(
+  (response) => {
+    console.log(`✅ [API RESPONSE] ${response.config.method.toUpperCase()} ${response.config.url}`, response.data);
+    return response;
+  },
+  (error) => {
+    console.error(`❌ [API RESPONSE ERROR] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
 // ==================== AUTH ====================
 
 export const login = async (name, password) => {
+  console.log('📤 [api.login] Preparing to send login request');
   const response = await api.post('/login', { name, password });
+  console.log('📥 [api.login] Received response:', response.data);
   return response.data;
 };
 
 export const logout = async () => {
+  console.log('📤 [api.logout] Preparing to send logout request');
   const response = await api.post('/logout');
+  console.log('📥 [api.logout] Received response:', response.data);
   return response.data;
 };
 
@@ -30,9 +57,12 @@ export const register = async (name, password) => {
 };
 
 export const checkSession = async () => {
+  console.log('📤 [api.checkSession] Checking session...');
   const response = await api.get('/check-session');
+  console.log('📥 [api.checkSession] Session data:', response.data);
   return response.data;
 };
+
 
 // ==================== USERS ====================
 

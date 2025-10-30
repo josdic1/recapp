@@ -1,11 +1,12 @@
 // src/pages/TestPage.jsx
 import { useState } from 'react';
 import axios from 'axios';
+import { login as apiLogin, logout as apiLogout } from '../api/api';  // ← IMPORT FROM API
 import { useUser } from '../providers';
 
 function TestPage() {
     const [message, setMessage] = useState('Click a button to test');
-    const { login, logout } = useUser();
+    const { user, setUser } = useUser();  // ← JUST GET user AND setUser
 
     const testHealthCheck = async () => {
         console.log('🧪 [TestPage] Health check button clicked');
@@ -22,14 +23,13 @@ function TestPage() {
     const testLogin = async () => {
         console.log('🧪 [TestPage] Login button clicked - calling login("alex", "1111")');
         
-        const result = await login('alex', '1111');
-        
-        if (result.success) {
-            console.log('🧪 [TestPage] Login successful! User:', result.user);
-            setMessage(`✅ Login Success! User: ${result.user.name}`);
-        } else {
-            console.log('🧪 [TestPage] Login failed:', result.error);
-            setMessage(`❌ Login Error: ${result.error}`);
+        try {
+            const data = await apiLogin('alex', '1111');  // ← USE apiLogin
+            setUser(data.user);
+            setMessage(`✅ Login Success! User: ${data.user.name}`);
+        } catch (error) {
+            console.error('Login error:', error);
+            setMessage(`❌ Login Error: ${error.message}`);
         }
     };
 
@@ -48,30 +48,29 @@ function TestPage() {
     const testLogout = async () => {
         console.log('🧪 [TestPage] Logout button clicked - calling logout()');
         
-        const result = await logout();
-        
-        if (result.success) {
-            console.log('🧪 [TestPage] Logout successful!');
+        try {
+            await apiLogout();  // ← USE apiLogout
+            setUser(null);
             setMessage(`✅ Logged out successfully`);
-        } else {
-            console.log('🧪 [TestPage] Logout failed:', result.error);
-            setMessage(`❌ Logout Error: ${result.error}`);
+        } catch (error) {
+            console.error('Logout error:', error);
+            setMessage(`❌ Logout Error: ${error.message}`);
         }
     };
 
     const testCategories = async () => {
-    console.log('🧪 [TestPage] Testing categories endpoint...');
-    try {
-        const response = await axios.get('/api/categories', {
-            withCredentials: true
-        });
-        console.log('✅ Categories:', response.data);
-        setMessage(`✅ Found ${response.data.length} categories`);
-    } catch (error) {
-        console.error('❌ Error:', error);
-        setMessage(`❌ Error: ${error.message}`);
-    }
-};
+        console.log('🧪 [TestPage] Testing categories endpoint...');
+        try {
+            const response = await axios.get('/api/categories', {
+                withCredentials: true
+            });
+            console.log('✅ Categories:', response.data);
+            setMessage(`✅ Found ${response.data.length} categories`);
+        } catch (error) {
+            console.error('❌ Error:', error);
+            setMessage(`❌ Error: ${error.message}`);
+        }
+    };
 
     return (
         <div>
@@ -94,8 +93,8 @@ function TestPage() {
             </button>
 
             <button onClick={testCategories}>
-    Test Categories
-</button>
+                Test Categories
+            </button>
             
             <p style={{ marginTop: '20px', fontSize: '18px' }}>
                 {message}

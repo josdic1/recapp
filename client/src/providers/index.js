@@ -2,7 +2,11 @@
 import { useContext } from 'react';
 import { UserContext } from './UserProvider';
 import { CategoryContext } from './CategoryProvider';
-// import { RecipeContext } from './RecipeProvider';  // Commented for now
+import { RecipeContext } from './RecipeProvider';
+
+export { default as UserProvider } from './UserProvider';
+export { default as CategoryProvider } from './CategoryProvider';
+export { default as RecipeProvider } from './RecipeProvider';
 
 export const useUser = () => {
     const context = useContext(UserContext);
@@ -16,9 +20,8 @@ export const useCategories = () => {
     return context;
 };
 
-// Commented out for now - we'll add back later
-// export const useRecipes = () => {
-//     const context = useContext(RecipeContext);
-//     if (!context) throw new Error('useRecipes must be used within RecipeProvider');
-//     return context;
-// };
+export const useRecipes = () => {
+    const context = useContext(RecipeContext);
+    if (!context) throw new Error('useRecipes must be used within RecipeProvider');
+    return context;
+};

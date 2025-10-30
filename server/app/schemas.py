@@ -22,18 +22,14 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         load_instance = True
-        exclude = ('_password_hash', 'recipes')  # ← EXCLUDE recipes!
-        load_only = ('password',)
+        include_fk = True
+        exclude = ('_password_hash',)
     
-    password = ma.String(load_only=True, required=True)
+    categories = ma.Method("get_categories")  # ← ADD THIS
     
-    # ONLY include categories - NO recipes
-    categories = ma.Method("get_categories")
-    
-    def get_categories(self, obj):
-        """Get user's categories"""
+    def get_categories(self, obj):  # ← ADD THIS
+        """Get unique categories from user's recipes"""
         return [{'id': cat.id, 'name': cat.name} for cat in obj.categories]
-
 
 # Schema instances
 user_schema = UserSchema()

@@ -15,7 +15,7 @@ function ErrorPage() {
                 <i>{error.statusText || error.message}</i>
             </p>
             
-            <button onClick={() => navigate('/')}>
+            <button onClick={() => navigate('/dashboard')}>
                 Return to Home
             </button>
         </div>

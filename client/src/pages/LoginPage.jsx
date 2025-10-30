@@ -1,77 +1,49 @@
 // src/pages/LoginPage.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../api/api';
 import { useUser } from '../providers';
 
 function LoginPage() {
+    const { setUser } = useUser();
     const navigate = useNavigate();
-    const { login } = useUser(); // ← Get login from Provider
-    
-    const [formData, setFormData] = useState({
-        name: '',
-        password: ''
-    });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-        setError('');
-    };
+    const [formData, setFormData] = useState({ name: '', password: '' });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
-
-        // Call Provider's login function
-        const result = await login(formData.name, formData.password);
-
-        if (result.success) {
-            navigate('/'); // Go to home after login
-        } else {
-            setError(result.error);
+        try {
+            const data = await login(formData.name, formData.password);
+            setUser(data.user);
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Login failed');
         }
+    };
 
-        setLoading(false);
+    const onChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     return (
-        <div className="login-container">
+        <div style={{ padding: '20px' }}>
             <h1>Login</h1>
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="name">Name:</label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="password">Password:</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Logging in...' : 'Login'}
-                </button>
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={formData.name}
+                    onChange={onChange}
+                />
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={onChange}
+                />
+                <button type="submit">Login</button>
             </form>
         </div>
     );

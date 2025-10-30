@@ -1,6 +1,6 @@
 // src/providers/CategoryProvider.jsx
 import { useState, useEffect, useMemo, createContext } from "react";
-import { getCategories as apiGetCategories } from "../api/api";
+import { getCategories as apiGetCategories, createCategory as apiCreateCategory } from "../api/api";
 
 export const CategoryContext = createContext();
 
@@ -8,17 +8,13 @@ function CategoryProvider({ children }) {
     const [categories, setCategories] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // THIS IS THE IMPORTANT PART - fetches categories on mount
     useEffect(() => {
-        console.log('📁 [CategoryProvider] Fetching categories...');
-        
         const fetchCategories = async () => {
             try {
                 const data = await apiGetCategories();
-                console.log('✅ [CategoryProvider] Categories fetched:', data);
                 setCategories(data);
             } catch (error) {
-                console.error('❌ [CategoryProvider] Error fetching categories:', error);
+                console.error('Error fetching categories:', error);
                 setCategories([]);
             } finally {
                 setLoading(false);
@@ -26,11 +22,28 @@ function CategoryProvider({ children }) {
         };
 
         fetchCategories();
-    }, []); // Empty array = run once on mount
+    }, []);
+
+    const onCreateCategory = async (name) => {
+        try {
+            const data = await apiCreateCategory(name);
+            setCategories(prevCategories => 
+                prevCategories ? [...prevCategories, data] : [data]
+            );
+            return { success: true, category: data };
+        } catch (error) {
+            console.error('Error creating category:', error);
+            return { 
+                success: false, 
+                error: error.response?.data?.error || error.message 
+            };
+        }
+    };
 
     const value = useMemo(() => ({
         categories,
         setCategories,
+        onCreateCategory,
         loading
     }), [categories, loading]);
 

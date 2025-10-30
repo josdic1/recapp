@@ -2,7 +2,7 @@
 import { Outlet } from 'react-router-dom'
 import NavBar from './components/NavBar'
 import CategoryProvider from './providers/CategoryProvider'
-import RecipeProvider from './providers/RecipeProvider'  // Keep the import
+import RecipeProvider from './providers/RecipeProvider'  
 import UserProvider from './providers/UserProvider'
 import './App.css'
 
@@ -11,8 +11,8 @@ function App() {
     <>
     <UserProvider>
     <CategoryProvider>
-    {/* Commented out for now - we'll add back later */}
-    {/* <RecipeProvider> */}
+
+    <RecipeProvider>
 
     <header>
     <NavBar />
@@ -21,7 +21,7 @@ function App() {
     <Outlet />
   </main>
   
-   {/* </RecipeProvider> */}
+   </RecipeProvider>
       </CategoryProvider>
     </UserProvider>
     </>

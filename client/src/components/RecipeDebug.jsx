@@ -1,6 +1,7 @@
 // src/components/RecipeDebug.jsx
 import { useRecipes } from '../providers';
 
+
 function RecipeDebug() {
     const { recipes, loading } = useRecipes();
 

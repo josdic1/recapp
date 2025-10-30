@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LogInIcon, LogOutIcon, LayoutDashboardIcon, TestTubeDiagonalIcon, UserIcon } from "lucide-react";
+import { LogInIcon, LogOutIcon, LayoutDashboardIcon, TestTubeDiagonalIcon, UserIcon, HomeIcon, FactoryIcon, Home } from "lucide-react";
 import { useUser } from "../providers";
 
 function NavBar() {
@@ -13,20 +13,32 @@ function NavBar() {
     return (
         <>
         <nav>
-            <NavLink to="/" className="nav-link">
-                Home
-            </NavLink>
+                <NavLink to="/dashboard" className="nav-link">
+                    <HomeIcon size={15} strokeWidth={2} />
+                 Home </NavLink>
 
             {/* Show Dashboard only if logged in */}
             {isAuthenticated && (
                 <NavLink to="/dashboard" className="nav-link">
-                    <LayoutDashboardIcon size={24} strokeWidth={2} />
+                    <LayoutDashboardIcon size={15} strokeWidth={2} />
+                 Dashboard </NavLink>
+            )}
+
+            {isAuthenticated && (
+                <NavLink to="/recipes/new" className="nav-link">
+                    <FactoryIcon size={15} strokeWidth={2} /> New Recipe
                 </NavLink>
             )}
 
+               {/* {isAuthenticated && (
+                <NavLink to="/categories/new" className="nav-link">
+                    <CassetteTapeIcon size={24} strokeWidth={2} />
+                </NavLink>
+            )} */}
+
             {/* Show Test page (you can remove this later) */}
             <NavLink to="/test" className="nav-link">
-                <TestTubeDiagonalIcon size={24} strokeWidth={2} />
+                <TestTubeDiagonalIcon size={15} strokeWidth={2} /> Test
             </NavLink>
 
             {/* Show Login or User Info + Logout */}

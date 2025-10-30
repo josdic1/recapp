@@ -1,19 +1,69 @@
 // src/components/RecipeItem.jsx
-function RecipeItem({ recipe }) {
-    const handleEdit = () => {
-        console.log('✏️ [RecipeItem] Edit clicked:', recipe.id, recipe.name);
-        // TODO: Open edit modal
-    };
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useRecipes } from '../providers';
 
-    const handleDelete = () => {
-        console.log('🗑️ [RecipeItem] Delete clicked:', recipe.id, recipe.name);
-        // TODO: Confirm and delete
+function RecipeItem({ recipe, onDelete }) {
+    const navigate = useNavigate();
+    const { deleteRecipe } = useRecipes();
+
+    console.log('🍽️ [RecipeItem] Rendering recipe:', recipe);  // ← ADD THIS
+
+
+    const onClick = async (e) => {
+        const { name } = e.target;
+
+        switch (name) {
+            case 'view':
+                console.log('Recipe ID before navigate:', recipe.id, typeof recipe.id);
+
+                if (!recipe.id) {
+                    alert("Recipe has no ID!");
+                    return;
+                }
+
+                const url = `/recipes/${recipe.id}`;
+                console.log('Navigating to:', url);
+                navigate(url);
+                break;
+
+            case 'edit':
+                console.log('✏️ [RecipeItem] Edit clicked, navigating to:', `/recipes/${recipe.id}/edit`);  // ← ADD THIS
+                navigate(`/recipes/${recipe.id}/edit`);
+                break;
+
+            case 'delete':
+                const confirmDelete = window.confirm(
+                    `Are you sure you want to delete "${recipe.name}"?`
+                );
+
+                if (confirmDelete) {
+                    console.log('Deleting:', recipe.name);
+
+                    // Call API
+                    const result = await deleteRecipe(recipe.id);
+
+                    // Check if it worked
+                    if (result.success) {
+                        console.log('Deleted!');
+
+                        // THIS IS THE KEY LINE:
+                        onDelete();  // ← Tells DashboardPage to remove it from the list
+                    } else {
+                        console.error('Delete failed:', result.error);
+                        alert(`Failed: ${result.error}`);
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
     };
 
     return (
-        <li 
-            key={recipe.id} 
-            style={{ 
+        <li
+            style={{
                 marginBottom: '15px',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -23,11 +73,10 @@ function RecipeItem({ recipe }) {
                 borderRadius: '5px'
             }}
         >
-            <span style={{ fontSize: '18px', fontWeight: '500', gap: '15px'}}>
+            <span style={{ fontSize: '18px', fontWeight: '500' }}>
                 {recipe.name}
             </span>
-            
-            
+
             <div style={{ display: 'flex', gap: '15px' }}>
                 <button
                     style={{
@@ -38,12 +87,15 @@ function RecipeItem({ recipe }) {
                         borderRadius: '3px',
                         cursor: 'pointer'
                     }}
+                    name='view'
+                    onClick={onClick}
                 >
                     View
                 </button>
 
                 <button
-                    onClick={handleEdit}
+                    onClick={onClick}
+                    name='edit'
                     style={{
                         padding: '5px 15px',
                         background: '#ffc107',
@@ -55,9 +107,10 @@ function RecipeItem({ recipe }) {
                 >
                     Edit
                 </button>
-                
+
                 <button
-                    onClick={handleDelete}
+                    onClick={onClick}
+                    name='delete'
                     style={{
                         padding: '5px 15px',
                         background: '#dc3545',

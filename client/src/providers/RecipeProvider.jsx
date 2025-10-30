@@ -1,53 +1,85 @@
 // src/providers/RecipeProvider.jsx
-import { useState, useEffect, useMemo, createContext, useContext } from "react";
-import { getRecipes as apiGetRecipes } from "../api/api";
+import { useMemo, createContext, useContext } from "react";
 import { UserContext } from "./UserProvider";
+import { 
+    createRecipe as apiCreateRecipe, 
+    deleteRecipe as apiDeleteRecipe,
+    updateRecipe as apiUpdateRecipe
+} from "../api/api";
+import { checkSession } from "../api/api";
 
 export const RecipeContext = createContext();
 
 function RecipeProvider({ children }) {
-    // const { user } = useContext(UserContext); // Get user from UserProvider
-    // const [recipes, setRecipes] = useState(null);
-    // const [loading, setLoading] = useState(false);
+    const { setUser } = useContext(UserContext);
 
-    // // Fetch recipes when user changes
-    // useEffect(() => {
-    //     if (!user) {
-    //         console.log('🍽️ [RecipeProvider] No user - clearing recipes');
-    //         setRecipes(null);
-    //         return;
-    //     }
+    const fetchRecipes = async () => {
+        try {
+            const data = await apiGetRecipes();
+            return data;
+        } catch (error) {
+            console.error('Error fetching recipes:', error);
+            return [];
+        }
+    };
 
-    //     console.log('🍽️ [RecipeProvider] User detected:', user.id, '- Fetching recipes...');
-        
-    //     const fetchRecipes = async () => {
-    //         setLoading(true);
-    //         try {
-    //             const data = await apiGetRecipes({ user_id: user.id });
-    //             console.log('✅ [RecipeProvider] Recipes fetched:', data);
-    //             setRecipes(data);
-    //         } catch (error) {
-    //             console.error('❌ [RecipeProvider] Error fetching recipes:', error);
-    //             setRecipes([]);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
+    const createRecipe = async (recipe) => {
+        try {
+            const data = await apiCreateRecipe(recipe);
+            const userData = await checkSession();
+            setUser(userData.user);
+            return { success: true, recipe: data };
+        } catch (error) {
+            console.error('Error creating recipe:', error);
+            return { 
+                success: false, 
+                error: error.response?.data?.error || error.message 
+            };
+        }
+    };
 
-    //     fetchRecipes();
-    // }, [user]); // Re-run when user changes
+const deleteRecipe = async (id) => {
+    try {
+        await apiDeleteRecipe(id);  // API call
+        const userData = await checkSession();  // Fetch fresh user
+        setUser(userData.user);  // Update global user
+        return { success: true, user: userData.user };  // ← RETURN USER
+    } catch (error) {
+        console.error('Error deleting recipe:', error);
+        return { 
+            success: false, 
+            error: error.response?.data?.error || error.message 
+        };
+    }
+};
 
-    // const value = useMemo(() => ({
-    //     recipes,
-    //     setRecipes,
-    //     loading
-    // }), [recipes, loading]);
+    const updateRecipe = async (recipe) => {
+        try {
+            const data = await apiUpdateRecipe(recipe);
+            const userData = await checkSession();
+            setUser(userData.user);
+            return { success: true, recipe: data };
+        } catch (error) {
+            console.error('Error updating recipe:', error);
+            return { 
+                success: false, 
+                error: error.message 
+            };
+        }
+    };
 
-    // return (
-    //     <RecipeContext.Provider value={value}>
-    //         {children}
-    //     </RecipeContext.Provider>
-    // );
+    const value = useMemo(() => ({
+        fetchRecipes,
+        createRecipe,
+        deleteRecipe,
+        updateRecipe
+    }), []);
+
+    return (
+        <RecipeContext.Provider value={value}>
+            {children}
+        </RecipeContext.Provider>
+    );
 }
 
 export default RecipeProvider;

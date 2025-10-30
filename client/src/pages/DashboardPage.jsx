@@ -15,25 +15,20 @@ function DashboardPage() {
     }
 
     const handleCategoryClick = async (category) => {
-    console.log('🔘 [Dashboard] Category clicked:', category.name);
-    setSelectedCategory(category);
-    setLoading(true);
+        console.log('🔘 [Dashboard] Category clicked:', category.name);
+        setSelectedCategory(category);
+        setLoading(true);
 
-    try {
-        console.log('📡 [Dashboard] Fetching recipes for category:', category.id);
-        // Don't send user_id - backend gets it from session!
-        const data = await getRecipes({ 
-            category_id: category.id 
-        });
-        console.log('✅ [Dashboard] Recipes received:', data);
-        setRecipes(data);
-    } catch (error) {
-        console.error('❌ [Dashboard] Error fetching recipes:', error);
-        setRecipes([]);
-    } finally {
-        setLoading(false);
-    }
-};
+        try {
+            const data = await getRecipes({ category_id: category.id });
+            setRecipes(data);
+        } catch (error) {
+            console.error('❌ [Dashboard] Error fetching recipes:', error);
+            setRecipes([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="dashboard" style={{ padding: '20px' }}>
@@ -66,7 +61,6 @@ function DashboardPage() {
                 )}
             </section>
 
-            {/* Recipe Display Section */}
             {selectedCategory && (
                 <section style={{ marginTop: '40px' }}>
                     <h2>{selectedCategory.name} Recipes</h2>
@@ -76,8 +70,15 @@ function DashboardPage() {
                     ) : recipes.length > 0 ? (
                         <ul style={{ listStyle: 'none', padding: 0 }}>
                             {recipes.map(recipe => (
-                                <RecipeItem key={recipe.id} recipe={recipe} />
-                            ))}
+    <RecipeItem 
+    recipes={recipes}
+        key={recipe.id}
+        recipe={recipe}
+        onDelete={() => {
+            setRecipes(prev => prev.filter(r => r.id !== recipe.id));
+        }}
+    />
+))}
                         </ul>
                     ) : (
                         <p>No recipes in this category yet.</p>

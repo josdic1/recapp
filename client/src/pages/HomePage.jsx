@@ -2,7 +2,7 @@
 import { BugOffIcon } from "lucide-react"
 import UserDebug from "../components/UserDebug"
 import CategoryDebug from "../components/CategoryDebug"
-// import RecipeDebug from "../components/RecipeDebug"  // Commented for now
+import RecipeDebug from "../components/RecipeDebug"  
 
 function HomePage() {
     return (
@@ -10,7 +10,7 @@ function HomePage() {
             <h1><BugOffIcon size={48} strokeWidth={2} className="my-icon" /></h1>
             <UserDebug />
             <CategoryDebug />
-            {/* <RecipeDebug /> */}
+            <RecipeDebug />
         </>
     )
 }
